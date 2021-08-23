@@ -1,0 +1,123 @@
+<html>
+<head>
+
+	<title>AI Video Surveillance</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.0.0/p5.js"></script>
+
+  <script src="https://unpkg.com/ml5@latest/dist/ml5.min.js"></script>
+  
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body background = "https://i.postimg.cc/cH65n7CJ/background.jpg">
+<center>
+<h1 class = "btn btn-warning heading">AI Video Surveillance</h1>
+<br><br>
+<h3 class = "btn btn-success" id = "start" onclick = "start()">Start</h3>
+<br><br>
+<h3 class = "btn btn-warning" id = "number_of_objects"></h3>
+<br><br>
+<h3 class = "btn btn-danger" id = "status"></h3>
+</center>
+
+<div class = "copy_right_footer">
+    Developed by - Joshua Thomas
+</div>
+
+<script src="main.js"></script>
+
+</body>
+<style>
+    body {
+        background-size : cover;
+    }
+
+    .heading {
+        font-size : 23px;
+        width : 100%;
+        margin : 0px;
+    }
+
+    #start, #number_of_objects, #status {
+        font-size : 18px;
+    }
+
+    .copy_right_footer {
+        position: fixed;
+        color : #6c757d;
+        bottom : 0;
+        width : 100%;
+        background-color: #f5f5f5;
+        line-height: 3;
+        text-align: center;
+    }
+
+    canvas {
+        border : 2px solid white;
+        border-radius : 10px;
+        margin-top : 130px;
+        box-shadow : 5px 5px 5px grey;
+    }
+</style>
+<script>
+    object = [];
+    status = "";
+    video = "";
+    percent = "";
+
+    function preload() {
+        video = createVideo("video.mp4");
+        video.hide();
+    }
+
+    function setup() {
+        canvas = createCanvas(480, 380);
+        canvas.center();
+    }
+
+    function draw() {
+        image(video, 0, 0, 480, 380);
+        if(status != "") {
+            objectDetector.detect(video, gotResult);
+            for (i = 0; i < object.length; i++) {
+                document.getElementById("status").innerHTML = "Status : Objects Detected";
+                document.getElementById("number_of_objects").innerHTML = "Number of objects detcted are : " + object.length;
+
+                fill("#FF0000");
+                percent = floor(object[i].confidence * 100);
+                text(object[i].label + " " + percent + "%", object[i].x + 15, object[i].y + 15);
+                noFill();
+                stroke("#FF0000");
+                rect(object[i].x, object[i].y, object[i].width, object[i].height);
+            }
+        }
+    }
+
+    function start() {
+        objectDetector = ml5.objectDetector('cocossd', modelLoaded);
+        document.getElementById("status").innerHTML = "Status : Detecting Objects";
+    }
+
+    function modelLoaded() {
+        console.log("Model Loaded!");
+        status = true;
+        video.loop();
+        video.speed(1);
+        video.volume(0);
+    }
+
+    function gotResult(error, result) {
+        if (error) {
+            console.log(error);
+        }
+        console.log(result);
+        object = result;
+
+    }
+</script>
+</html>
